@@ -1,0 +1,79 @@
+@startuml FutureKawa_DB_Schema
+!theme cerulean-outline
+skinparam linetype ortho
+skinparam defaultFontSize 13
+
+entity "entrepots" as E {
+    * id            : SERIAL       <<PK>>
+    --
+    * code          : VARCHAR(10)  <<UK>>
+    * nom           : VARCHAR(100)
+    * exploitation  : VARCHAR(100)
+    * pays          : VARCHAR(50)
+    --
+    * temp_ideale   : DECIMAL(5,2)
+    * hum_ideale    : DECIMAL(5,2)
+    * tolerance_temp: DECIMAL(4,2)
+    * tolerance_hum : DECIMAL(4,2)
+    --
+    * created_at    : TIMESTAMPTZ
+}
+
+entity "lots" as L {
+    * id            : VARCHAR(50)  <<PK>>
+    --
+    * entrepot_id   : INTEGER      <<FK>>
+    * date_stockage : TIMESTAMPTZ
+    * statut        : VARCHAR(20)
+      notes         : TEXT
+    --
+    * created_at    : TIMESTAMPTZ
+    * updated_at    : TIMESTAMPTZ
+}
+
+entity "mesures" as M {
+    * id            : BIGSERIAL    <<PK>>
+    --
+    * entrepot_id   : INTEGER      <<FK>>
+    * temperature   : DECIMAL(5,2)
+    * humidite      : DECIMAL(5,2)
+    * hors_plage    : BOOLEAN
+    * timestamp     : TIMESTAMPTZ
+}
+
+entity "alertes" as A {
+    * id                  : BIGSERIAL    <<PK>>
+    --
+      entrepot_id         : INTEGER      <<FK>>
+      lot_id              : VARCHAR(50)  <<FK>>
+    * type                : VARCHAR(20)
+    * message             : TEXT
+    * email_envoye        : BOOLEAN
+      email_destinataire  : VARCHAR(255)
+    * created_at          : TIMESTAMPTZ
+}
+
+E ||--o{ L : "contient\n(1 entrepot -> N lots)"
+E ||--o{ M : "enregistre\n(1 entrepot -> N mesures IoT)"
+E ||--o{ A : "declenche"
+L ||--o{ A : "concerne"
+
+note bottom of L
+  Tri par date_stockage ASC
+  => logique FIFO
+end note
+
+note bottom of M
+  Index (entrepot_id, timestamp DESC)
+  pour historiques rapides
+end note
+
+note right of E
+  Seuils par pays :
+  Bresil   : 29°C / 55%
+  Equateur : 31°C / 60%
+  Colombie : 26°C / 80%
+  Tolerance : ±3°C / ±2%
+end note
+
+@enduml

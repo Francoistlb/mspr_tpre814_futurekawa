@@ -1,6 +1,8 @@
 # Variables d'environnement (ne jamais committer)
 .env
 **/.env
+.env.local
+.env.prod
 
 
 # Python
