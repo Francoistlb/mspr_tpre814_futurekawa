@@ -1,0 +1,105 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: futurekawa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  api-bresil:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: futurekawa
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PAYS: Bresil
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: futurekawa/bresil/#
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      RESPONSABLE_EMAIL: responsable-bresil@futurekawa.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      mailhog:
+        condition: service_started
+
+  api-equateur:
+    build: .
+    ports:
+      - "3002:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: futurekawa
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PAYS: Equateur
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: futurekawa/equateur/#
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      RESPONSABLE_EMAIL: responsable-equateur@futurekawa.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      mailhog:
+        condition: service_started
+
+  api-colombie:
+    build: .
+    ports:
+      - "3003:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: futurekawa
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PAYS: Colombie
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: futurekawa/colombie/#
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      RESPONSABLE_EMAIL: responsable-colombie@futurekawa.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      mailhog:
+        condition: service_started
