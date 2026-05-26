@@ -44,14 +44,18 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@bresil-db:5432/futurekawa_bresil
-      MQTT_BROKER_HOST: bresil-mqtt
-      MQTT_BROKER_PORT: "1883"
-      PAYS: bresil
-      PAYS_CODE: BR
+      DB_HOST: bresil-db
+      DB_PORT: "5432"
+      DB_NAME: futurekawa_bresil
+      DB_USER: futurekawa
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      MQTT_HOST: bresil-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/bresil/#
+      PAYS: Bresil
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.bresil@futurekawa.com
+      RESPONSABLE_EMAIL: responsable.bresil@futurekawa.com
     depends_on:
       bresil-db:
         condition: service_healthy
@@ -95,14 +99,18 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@equateur-db:5432/futurekawa_equateur
-      MQTT_BROKER_HOST: equateur-mqtt
-      MQTT_BROKER_PORT: "1883"
-      PAYS: equateur
-      PAYS_CODE: EQ
+      DB_HOST: equateur-db
+      DB_PORT: "5432"
+      DB_NAME: futurekawa_equateur
+      DB_USER: futurekawa
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      MQTT_HOST: equateur-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/equateur/#
+      PAYS: Equateur
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.equateur@futurekawa.com
+      RESPONSABLE_EMAIL: responsable.equateur@futurekawa.com
     depends_on:
       equateur-db:
         condition: service_healthy
@@ -146,14 +154,18 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@colombie-db:5432/futurekawa_colombie
-      MQTT_BROKER_HOST: colombie-mqtt
-      MQTT_BROKER_PORT: "1883"
-      PAYS: colombie
-      PAYS_CODE: CO
+      DB_HOST: colombie-db
+      DB_PORT: "5432"
+      DB_NAME: futurekawa_colombie
+      DB_USER: futurekawa
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      MQTT_HOST: colombie-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/colombie/#
+      PAYS: Colombie
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.colombie@futurekawa.com
+      RESPONSABLE_EMAIL: responsable.colombie@futurekawa.com
     depends_on:
       colombie-db:
         condition: service_healthy
