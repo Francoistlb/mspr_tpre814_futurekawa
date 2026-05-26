@@ -35,3 +35,7 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+
+siege/api/coverage/
+siege/api/package-lock.json
