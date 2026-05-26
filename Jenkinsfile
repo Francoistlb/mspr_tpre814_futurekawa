@@ -26,6 +26,15 @@ pipeline {
             }
         }
 
+        stage('Prepare') {
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
+            steps {
+                withCredentials([file(credentialsId: 'env-ci', variable: 'ENV_CI_FILE')]) {
+                    sh 'cp $ENV_CI_FILE .env.ci'
+                }
+            }
+        }
+
         stage('Build') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
