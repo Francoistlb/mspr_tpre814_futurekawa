@@ -15,12 +15,14 @@ FAILED_SERVICES=""
 check_api() {
   local service=$1
   local port=$2
+  local max=15
+  local output
 
   printf "  %-24s" "$service (/health:$port)"
 
-  local output
-  if output=$(docker compose --env-file "$ENV_FILE" exec -T "$service" \
-    node -e "
+  for i in $(seq 1 $max); do
+    if output=$(docker compose --env-file "$ENV_FILE" exec -T "$service" \
+      node -e "
 const http = require('http');
 http.get('http://localhost:${port}/health', r => {
   let d = '';
@@ -32,15 +34,18 @@ http.get('http://localhost:${port}/health', r => {
       process.exit(j.status === 'ok' ? 0 : 1);
     } catch { process.exit(1); }
   });
-}).on('error', e => { process.stderr.write(e.message); process.exit(1); });
+}).on('error', () => process.exit(1));
 " 2>/dev/null); then
-    echo " PASS  $output"
-    PASS=$((PASS + 1))
-  else
-    echo " FAIL"
-    FAIL=$((FAIL + 1))
-    FAILED_SERVICES="$FAILED_SERVICES $service"
-  fi
+      echo " PASS  $output"
+      PASS=$((PASS + 1))
+      return
+    fi
+    sleep 2
+  done
+
+  echo " FAIL (timeout ${max}x2s)"
+  FAIL=$((FAIL + 1))
+  FAILED_SERVICES="$FAILED_SERVICES $service"
 }
 
 echo ""
