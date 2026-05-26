@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      BRESIL_API_URL: ${BRESIL_API_URL:-http://host.docker.internal:8001}
+      EQUATEUR_API_URL: ${EQUATEUR_API_URL:-http://host.docker.internal:8002}
+      COLOMBIE_API_URL: ${COLOMBIE_API_URL:-http://host.docker.internal:8003}
+      API_TIMEOUT_S: ${API_TIMEOUT_S:-3}
+    ports:
+      - "${SIEGE_API_PORT:-8000}:8000"
+    networks:
+      - siege_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_SIEGE_API_URL: ${VITE_SIEGE_API_URL:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - api
+    networks:
+      - siege_net
+    restart: unless-stopped
+
+networks:
+  siege_net:
+    name: fk_siege_net
