@@ -27,18 +27,21 @@ pipeline {
         }
 
         stage('Build') {
+            when { branch 'develop' }
             steps {
                 sh 'docker compose --env-file ${ENV_FILE} build --no-cache'
             }
         }
 
         stage('Start') {
+            when { branch 'develop' }
             steps {
                 sh 'docker compose --env-file ${ENV_FILE} up -d'
             }
         }
 
         stage('Health Checks') {
+            when { branch 'develop' }
             steps {
                 sh '''
                     check() {
@@ -66,6 +69,7 @@ pipeline {
         }
 
         stage('Tests') {
+            when { branch 'develop' }
             steps {
                 echo 'Tests a implementer — Etape 7'
             }
