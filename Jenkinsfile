@@ -44,26 +44,24 @@ pipeline {
             when { branch 'develop' }
             steps {
                 sh '''
-                    check() {
+                    wait_for() {
                         local svc=$1
-                        echo "==> Attente de $svc..."
+                        echo "==> Attente du conteneur $svc..."
                         for i in $(seq 1 30); do
-                            if docker compose --env-file "$ENV_FILE" exec -T "$svc" \
-                               python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" \
-                               2>/dev/null; then
-                                echo "$svc : OK"
+                            if docker compose --env-file "$ENV_FILE" exec -T "$svc" true 2>/dev/null; then
+                                echo "$svc : conteneur accessible"
                                 return 0
                             fi
                             sleep 2
                         done
-                        echo "$svc : TIMEOUT apres 60s"
+                        echo "$svc : TIMEOUT — conteneur inaccessible apres 60s"
                         return 1
                     }
-                    check bresil-api
-                    check equateur-api
-                    check colombie-api
-                    check siege-api
-                    echo "Tous les services sont operationnels."
+                    wait_for bresil-api
+                    wait_for equateur-api
+                    wait_for colombie-api
+                    wait_for siege-api
+                    echo "Tous les conteneurs sont demarres."
                 '''
             }
         }
@@ -71,7 +69,7 @@ pipeline {
         stage('Tests') {
             when { branch 'develop' }
             steps {
-                echo 'Tests a implementer — Etape 7'
+                sh 'ENV_FILE=${ENV_FILE} bash test-cicd/health-check.sh'
             }
         }
 
