@@ -3,7 +3,7 @@
 # Requires: make (Git Bash / WSL / Linux)
 # ============================================================
 
-.PHONY: help setup up up-local up-prod down up-bresil up-equateur up-colombie up-siege logs clean
+.PHONY: help setup up up-local up-prod down up-bresil up-equateur up-colombie up-siege logs clean up-jenkins down-jenkins
 
 # Afficher l'aide
 help:
@@ -23,7 +23,7 @@ help:
 	@echo "  make clean        : supprimer les volumes (perte de donnees !)"
 	@echo ""
 
-# Copier les fichiers .env depuis les .env.example
+# Initialiser les .env des stacks pays et siege depuis leurs .env.example
 setup:
 	@echo "Configuration des fichiers .env..."
 	@test -f .env            || cp .env.example .env
@@ -71,6 +71,14 @@ up-colombie: setup
 
 up-siege: setup
 	docker compose -p fk-siege -f siege/docker-compose.yml up --build -d
+
+# Jenkins CI
+up-jenkins:
+	docker compose -f jenkins/docker-compose.yml up --build -d
+	@echo "Jenkins disponible sur http://localhost:8080"
+
+down-jenkins:
+	docker compose -f jenkins/docker-compose.yml down
 
 logs:
 	docker compose logs -f
