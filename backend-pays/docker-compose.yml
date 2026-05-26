@@ -111,4 +111,4 @@ services:
       - futurekawa_net
 networks:
   futurekawa_net:
-    external: true 
+    driver: bridge
