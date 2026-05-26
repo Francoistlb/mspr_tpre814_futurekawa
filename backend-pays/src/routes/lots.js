@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../db');
-const schema = process.env.PAYS.toLowerCase();
+const schema = (process.env.PAYS || 'bresil').toLowerCase();
 
 router.post('/', async (req, res) => {
   const { id, pays, exploitation, entrepot, date_stockage } = req.body;

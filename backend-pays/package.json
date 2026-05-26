@@ -6,8 +6,16 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js",
+  "test": "jest --verbose",
+  "test:coverage": "jest --coverage",
+  "test:watch": "jest --watch"
+},
+"jest": {
+  "testEnvironment": "node",
+  "coverageReporters": ["text", "html"]
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

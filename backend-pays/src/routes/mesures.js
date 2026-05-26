@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../db');
 const { verifierSeuils } = require('../alertes');
-const schema = process.env.PAYS.toLowerCase();
+const schema = (process.env.PAYS || 'bresil').toLowerCase();
 
 router.post('/', async (req, res) => {
   const { entrepot, temperature, humidite } = req.body;

@@ -26,10 +26,10 @@ services:
       - "1025:1025"
       - "8025:8025"
 
-  api-bresil:
+  bresil-api:
     build: .
     ports:
-      - "3001:3000"
+      - "8001:3000"
     environment:
       PORT: 3000
       DB_HOST: postgres
@@ -51,11 +51,13 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+    networks:
+      - futurekawa_net
 
-  api-equateur:
+  equateur-api:
     build: .
     ports:
-      - "3002:3000"
+      - "8002:3000"
     environment:
       PORT: 3000
       DB_HOST: postgres
@@ -77,11 +79,13 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+    networks:
+      - futurekawa_net
 
-  api-colombie:
+  colombie-api:
     build: .
     ports:
-      - "3003:3000"
+      - "8003:3000"
     environment:
       PORT: 3000
       DB_HOST: postgres
@@ -103,3 +107,8 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+    networks:
+      - futurekawa_net
+networks:
+  futurekawa_net:
+    external: true 
