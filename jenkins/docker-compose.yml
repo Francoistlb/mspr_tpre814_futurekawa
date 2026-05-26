@@ -2,7 +2,7 @@ services:
   jenkins:
     build:
       context: .
-      dockerfile: jenkins/Dockerfile
+      dockerfile: Dockerfile
     container_name: futurekawa-jenkins
     user: root
     ports:
