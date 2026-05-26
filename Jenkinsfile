@@ -40,12 +40,28 @@ pipeline {
 
         stage('Health Checks') {
             steps {
-                sh 'chmod +x scripts/wait-for-health.sh'
-                sh './scripts/wait-for-health.sh http://localhost:8001/health "Bresil API"'
-                sh './scripts/wait-for-health.sh http://localhost:8002/health "Equateur API"'
-                sh './scripts/wait-for-health.sh http://localhost:8003/health "Colombie API"'
-                sh './scripts/wait-for-health.sh http://localhost:8000/health "Siege API"'
-                echo 'Tous les services sont operationnels.'
+                sh '''
+                    check() {
+                        local svc=$1
+                        echo "==> Attente de $svc..."
+                        for i in $(seq 1 30); do
+                            if docker compose --env-file "$ENV_FILE" exec -T "$svc" \
+                               python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" \
+                               2>/dev/null; then
+                                echo "$svc : OK"
+                                return 0
+                            fi
+                            sleep 2
+                        done
+                        echo "$svc : TIMEOUT apres 60s"
+                        return 1
+                    }
+                    check bresil-api
+                    check equateur-api
+                    check colombie-api
+                    check siege-api
+                    echo "Tous les services sont operationnels."
+                '''
             }
         }
 

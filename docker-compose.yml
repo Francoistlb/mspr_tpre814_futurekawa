@@ -3,8 +3,10 @@
 # Demarre l'ensemble de la solution sur une seule machine
 # Usage : docker compose up --build
 #
-# En production, chaque pays tourne sur son propre serveur
-# avec pays/{pays}/docker-compose.yml
+# Pas de ports exposes : les services communiquent via les
+# reseaux Docker internes. Pour acceder depuis le navigateur
+# en local, utiliser les stacks individuelles :
+#   make up-bresil / make up-siege / etc.
 # ============================================================
 
 services:
@@ -50,8 +52,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.bresil@futurekawa.com
-    ports:
-      - "8001:8000"
     depends_on:
       bresil-db:
         condition: service_healthy
@@ -103,8 +103,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.equateur@futurekawa.com
-    ports:
-      - "8002:8000"
     depends_on:
       equateur-db:
         condition: service_healthy
@@ -156,8 +154,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.colombie@futurekawa.com
-    ports:
-      - "8003:8000"
     depends_on:
       colombie-db:
         condition: service_healthy
@@ -178,8 +174,6 @@ services:
       EQUATEUR_API_URL: http://equateur-api:8000
       COLOMBIE_API_URL: http://colombie-api:8000
       API_TIMEOUT_S: "3"
-    ports:
-      - "8000:8000"
     depends_on:
       - bresil-api
       - equateur-api
@@ -192,8 +186,6 @@ services:
     build:
       context: ./siege/frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:80"
     depends_on:
       - siege-api
     networks:
@@ -203,9 +195,6 @@ services:
   # ---- Mailhog : serveur SMTP de test ----------------------
   mailhog:
     image: mailhog/mailhog:v1.0.1
-    ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # UI web (http://localhost:8025)
     networks:
       - futurekawa_net
       - bresil_net
