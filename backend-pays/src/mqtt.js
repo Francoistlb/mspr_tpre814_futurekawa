@@ -14,12 +14,31 @@ const demarrerConsumer = () => {
   client.on('message', async (topic, message) => {
     try {
       const data = JSON.parse(message.toString());
-      await pool.query(
-        `INSERT INTO mesures (entrepot, temperature, humidite, timestamp)
-         VALUES ($1, $2, $3, $4)`,
-        [data.entrepot, data.temp, data.hum, data.ts || new Date()]
+      const pays = process.env.PAYS.toLowerCase();
+
+      const e = await pool.query(
+        'SELECT * FROM entrepots WHERE code = $1 AND pays = $2',
+        [data.entrepot, pays]
       );
-      await verifierSeuils(process.env.PAYS, data.temp, data.hum, data.entrepot);
+      if (!e.rows.length) {
+        console.warn(`MQTT: entrepôt inconnu '${data.entrepot}' pour ${pays}`);
+        return;
+      }
+      const entrepot = e.rows[0];
+
+      const hors_plage =
+        Math.abs(data.temp - entrepot.temp_ideale) > entrepot.tolerance_temp ||
+        Math.abs(data.hum - entrepot.hum_ideale) > entrepot.tolerance_hum;
+
+      const mesure = await pool.query(
+        `INSERT INTO mesures (entrepot_id, temperature, humidite, hors_plage, timestamp)
+         VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [entrepot.id, data.temp, data.hum, hors_plage, data.ts || new Date()]
+      );
+
+      if (hors_plage) {
+        await verifierSeuils(entrepot, data.temp, data.hum, mesure.rows[0].id);
+      }
     } catch (err) {
       console.error('Erreur message MQTT:', err.message);
     }
