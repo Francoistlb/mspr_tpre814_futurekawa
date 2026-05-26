@@ -10,8 +10,12 @@ const pool = new Pool({
 });
 
 const init = async () => {
+  const schema = process.env.PAYS.toLowerCase(); // bresil, equateur, colombie
+
+  await pool.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS lots (
+    CREATE TABLE IF NOT EXISTS ${schema}.lots (
       id VARCHAR PRIMARY KEY,
       pays VARCHAR NOT NULL,
       exploitation VARCHAR,
@@ -19,7 +23,7 @@ const init = async () => {
       date_stockage DATE NOT NULL,
       statut VARCHAR DEFAULT 'conforme'
     );
-    CREATE TABLE IF NOT EXISTS mesures (
+    CREATE TABLE IF NOT EXISTS ${schema}.mesures (
       id SERIAL PRIMARY KEY,
       entrepot VARCHAR NOT NULL,
       temperature FLOAT NOT NULL,
@@ -27,7 +31,7 @@ const init = async () => {
       timestamp TIMESTAMP DEFAULT NOW()
     );
   `);
-  console.log('Base de données initialisée');
+  console.log(`Schéma "${schema}" initialisé`);
 };
 
 module.exports = { pool, init };

@@ -36,13 +36,16 @@ const verifierSeuils = async (pays, temperature, humidite, entrepot) => {
 };
 
 const verifierPeremption = async (pool) => {
+  const schema = process.env.PAYS.toLowerCase();
   const result = await pool.query(`
-    SELECT id, entrepot, date_stockage FROM lots
+    SELECT id, entrepot, date_stockage FROM ${schema}.lots
     WHERE date_stockage < NOW() - INTERVAL '365 days'
     AND statut != 'perime'
   `);
   for (const lot of result.rows) {
-    await pool.query(`UPDATE lots SET statut='perime' WHERE id=$1`, [lot.id]);
+    await pool.query(
+      `UPDATE ${schema}.lots SET statut='perime' WHERE id=$1`, [lot.id]
+    );
     await envoyerEmail(
       `[ALERTE] Lot périmé — ${lot.id}`,
       `Le lot ${lot.id} (entrepôt: ${lot.entrepot}) est stocké depuis plus de 365 jours.`
