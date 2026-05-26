@@ -33,8 +33,6 @@ services:
       - ./pays/bresil/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - bresil_mqtt_data:/mosquitto/data
       - bresil_mqtt_logs:/mosquitto/log
-    ports:
-      - "1883:1883"
     networks:
       - bresil_net
     restart: unless-stopped
@@ -88,8 +86,6 @@ services:
       - ./pays/equateur/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - equateur_mqtt_data:/mosquitto/data
       - equateur_mqtt_logs:/mosquitto/log
-    ports:
-      - "1884:1883"
     networks:
       - equateur_net
     restart: unless-stopped
@@ -143,8 +139,6 @@ services:
       - ./pays/colombie/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - colombie_mqtt_data:/mosquitto/data
       - colombie_mqtt_logs:/mosquitto/log
-    ports:
-      - "1885:1883"
     networks:
       - colombie_net
     restart: unless-stopped
