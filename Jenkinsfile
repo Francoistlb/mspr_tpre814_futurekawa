@@ -12,9 +12,9 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
-    // Polling toutes les 5 minutes — pas besoin de webhook ni de serveur public
+    // Polling toutes les 1 minutes — pas besoin de webhook ni de serveur public
     triggers {
-        pollSCM('H/5 * * * *')
+        pollSCM('* * * * *')
     }
 
     stages {
