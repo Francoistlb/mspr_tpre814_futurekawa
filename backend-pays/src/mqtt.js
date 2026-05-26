@@ -1,7 +1,9 @@
+import dotenv from "dotenv";
+
+dotenv.config();
 const mqtt = require('mqtt');
 const { pool } = require('./db');
 const { verifierSeuils } = require('./alertes');
-require('dotenv').config();
 
 const demarrerConsumer = () => {
   const client = mqtt.connect(`mqtt://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`);
