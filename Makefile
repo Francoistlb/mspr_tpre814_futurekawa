@@ -26,10 +26,13 @@ help:
 # Initialiser les .env des stacks pays et siege depuis leurs .env.example
 setup:
 	@echo "Configuration des fichiers .env..."
+	@test -f .env            || cp .env.example .env
+	@test -f .env.local      || cp .env.example .env.local
 	@test -f pays/bresil/.env    || cp pays/bresil/.env.example    pays/bresil/.env
 	@test -f pays/equateur/.env  || cp pays/equateur/.env.example  pays/equateur/.env
 	@test -f pays/colombie/.env  || cp pays/colombie/.env.example  pays/colombie/.env
 	@test -f siege/.env          || cp siege/.env.example          siege/.env
+	@test -f siege/api/.env      || cp siege/api/.env.example      siege/api/.env
 	@echo "Fichiers .env crees. Pensez a modifier les mots de passe !"
 
 # Local (dev) — utilise .env.local
