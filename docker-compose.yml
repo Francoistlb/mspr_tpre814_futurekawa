@@ -41,7 +41,7 @@ services:
 
   bresil-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@bresil-db:5432/futurekawa_bresil
@@ -96,7 +96,7 @@ services:
 
   equateur-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@equateur-db:5432/futurekawa_equateur
@@ -151,7 +151,7 @@ services:
 
   colombie-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@colombie-db:5432/futurekawa_colombie

@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Installer les dépendances en premier (cache Docker layer)
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 COPY src/ ./src/
 
