@@ -3,8 +3,10 @@
 # Demarre l'ensemble de la solution sur une seule machine
 # Usage : docker compose up --build
 #
-# En production, chaque pays tourne sur son propre serveur
-# avec pays/{pays}/docker-compose.yml
+# Pas de ports exposes : les services communiquent via les
+# reseaux Docker internes. Pour acceder depuis le navigateur
+# en local, utiliser les stacks individuelles :
+#   make up-bresil / make up-siege / etc.
 # ============================================================
 
 services:
@@ -33,15 +35,13 @@ services:
       - ./pays/bresil/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - bresil_mqtt_data:/mosquitto/data
       - bresil_mqtt_logs:/mosquitto/log
-    ports:
-      - "1883:1883"
     networks:
       - bresil_net
     restart: unless-stopped
 
   bresil-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@bresil-db:5432/futurekawa_bresil
@@ -52,8 +52,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.bresil@futurekawa.com
-    ports:
-      - "8001:8000"
     depends_on:
       bresil-db:
         condition: service_healthy
@@ -88,15 +86,13 @@ services:
       - ./pays/equateur/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - equateur_mqtt_data:/mosquitto/data
       - equateur_mqtt_logs:/mosquitto/log
-    ports:
-      - "1884:1883"
     networks:
       - equateur_net
     restart: unless-stopped
 
   equateur-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@equateur-db:5432/futurekawa_equateur
@@ -107,8 +103,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.equateur@futurekawa.com
-    ports:
-      - "8002:8000"
     depends_on:
       equateur-db:
         condition: service_healthy
@@ -143,15 +137,13 @@ services:
       - ./pays/colombie/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - colombie_mqtt_data:/mosquitto/data
       - colombie_mqtt_logs:/mosquitto/log
-    ports:
-      - "1885:1883"
     networks:
       - colombie_net
     restart: unless-stopped
 
   colombie-api:
     build:
-      context: ./api-pays
+      context: ./backend-pays
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@colombie-db:5432/futurekawa_colombie
@@ -162,8 +154,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       ALERT_EMAIL_RESPONSABLE: responsable.colombie@futurekawa.com
-    ports:
-      - "8003:8000"
     depends_on:
       colombie-db:
         condition: service_healthy
@@ -184,8 +174,6 @@ services:
       EQUATEUR_API_URL: http://equateur-api:8000
       COLOMBIE_API_URL: http://colombie-api:8000
       API_TIMEOUT_S: "3"
-    ports:
-      - "8000:8000"
     depends_on:
       - bresil-api
       - equateur-api
@@ -198,8 +186,6 @@ services:
     build:
       context: ./siege/frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:80"
     depends_on:
       - siege-api
     networks:
@@ -209,9 +195,6 @@ services:
   # ---- Mailhog : serveur SMTP de test ----------------------
   mailhog:
     image: mailhog/mailhog:v1.0.1
-    ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # UI web (http://localhost:8025)
     networks:
       - futurekawa_net
       - bresil_net

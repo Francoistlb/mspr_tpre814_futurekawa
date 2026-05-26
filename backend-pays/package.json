@@ -1,0 +1,35 @@
+{
+  "name": "backend-pays",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js",
+  "test": "jest --verbose",
+  "test:coverage": "jest --coverage",
+  "test:watch": "jest --watch"
+},
+"jest": {
+  "testEnvironment": "node",
+  "coverageReporters": ["text", "html"]
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mqtt": "^5.15.1",
+    "nodemailer": "^8.0.8",
+    "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}
