@@ -27,21 +27,21 @@ pipeline {
         }
 
         stage('Build') {
-            when { branch 'develop' }
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
                 sh 'docker compose --env-file ${ENV_FILE} build --no-cache'
             }
         }
 
         stage('Start') {
-            when { branch 'develop' }
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
                 sh 'docker compose --env-file ${ENV_FILE} up -d'
             }
         }
 
         stage('Health Checks') {
-            when { branch 'develop' }
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
                 sh '''
                     wait_for() {
@@ -67,7 +67,7 @@ pipeline {
         }
 
         stage('Tests') {
-            when { branch 'develop' }
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
                 sh 'ENV_FILE=${ENV_FILE} bash test-cicd/health-check.sh'
             }
