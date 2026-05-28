@@ -1,18 +1,4 @@
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: futurekawa
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   mosquitto:
     image: eclipse-mosquitto:2
     ports:
@@ -32,11 +18,7 @@ services:
       - "8001:3000"
     environment:
       PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: futurekawa
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_PATH: /data/futurekawa.db
       PAYS: Bresil
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
@@ -44,9 +26,9 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       RESPONSABLE_EMAIL: responsable-bresil@futurekawa.com
+    volumes:
+      - ../db:/data
     depends_on:
-      postgres:
-        condition: service_healthy
       mosquitto:
         condition: service_started
       mailhog:
@@ -60,11 +42,7 @@ services:
       - "8002:3000"
     environment:
       PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: futurekawa
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_PATH: /data/futurekawa.db
       PAYS: Equateur
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
@@ -72,9 +50,9 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       RESPONSABLE_EMAIL: responsable-equateur@futurekawa.com
+    volumes:
+      - ../db:/data
     depends_on:
-      postgres:
-        condition: service_healthy
       mosquitto:
         condition: service_started
       mailhog:
@@ -88,11 +66,7 @@ services:
       - "8003:3000"
     environment:
       PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: futurekawa
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_PATH: /data/futurekawa.db
       PAYS: Colombie
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
@@ -100,15 +74,16 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       RESPONSABLE_EMAIL: responsable-colombie@futurekawa.com
+    volumes:
+      - ../db:/data
     depends_on:
-      postgres:
-        condition: service_healthy
       mosquitto:
         condition: service_started
       mailhog:
         condition: service_started
     networks:
       - futurekawa_net
+
 networks:
   futurekawa_net:
-    external: true 
+    driver: bridge

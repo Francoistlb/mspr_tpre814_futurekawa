@@ -1,7 +1,6 @@
 const mqtt = require('mqtt');
 const { pool } = require('./db');
 const { verifierSeuils } = require('./alertes');
-require('dotenv').config();
 
 const demarrerConsumer = () => {
   const client = mqtt.connect(`mqtt://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`);
@@ -14,12 +13,31 @@ const demarrerConsumer = () => {
   client.on('message', async (topic, message) => {
     try {
       const data = JSON.parse(message.toString());
-      await pool.query(
-        `INSERT INTO mesures (entrepot, temperature, humidite, timestamp)
-         VALUES ($1, $2, $3, $4)`,
-        [data.entrepot, data.temp, data.hum, data.ts || new Date()]
+      const pays = process.env.PAYS.toLowerCase();
+
+      const e = await pool.query(
+        'SELECT * FROM entrepots WHERE code = ? AND pays = ?',
+        [data.entrepot, pays]
       );
-      await verifierSeuils(process.env.PAYS, data.temp, data.hum, data.entrepot);
+      if (!e.rows.length) {
+        console.warn(`MQTT: entrepôt inconnu '${data.entrepot}' pour ${pays}`);
+        return;
+      }
+      const entrepot = e.rows[0];
+
+      const hors_plage =
+        Math.abs(data.temp - entrepot.temp_ideale) > entrepot.tolerance_temp ||
+        Math.abs(data.hum - entrepot.hum_ideale) > entrepot.tolerance_hum;
+
+      const inserted = await pool.query(
+        `INSERT INTO mesures (entrepot_id, temperature, humidite, hors_plage, timestamp)
+         VALUES (?, ?, ?, ?, ?)`,
+        [entrepot.id, data.temp, data.hum, hors_plage ? 1 : 0, data.ts || new Date().toISOString()]
+      );
+
+      if (hors_plage) {
+        await verifierSeuils(entrepot, data.temp, data.hum, inserted.lastID);
+      }
     } catch (err) {
       console.error('Erreur message MQTT:', err.message);
     }

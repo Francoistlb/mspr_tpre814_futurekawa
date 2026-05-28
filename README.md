@@ -8,12 +8,43 @@ Solution applicative distribuée de suivi des stocks et des conditions de stocka
 
 ## Démarrage rapide
 
-```bash
-# 1. Copier les fichiers d'environnement
-make setup
+### Avec Docker (recommandé)
 
-# 2. Démarrer toute la solution (mode démo)
-make up
+```bash
+# 1. Copier le fichier d'environnement
+cp .env.example .env
+
+# 2. Démarrer toute la solution
+docker compose up --build -d
+```
+
+### Développement local (sans Docker)
+
+**Frontend (React + Vite)**
+```bash
+cd siege/frontend
+npm install
+npm run dev
+# Accessible sur http://localhost:5173
+```
+
+**API Siège (Node.js + Express)**
+```bash
+cd siege/api
+npm install
+npm run dev
+# Accessible sur http://localhost:8000/docs
+```
+
+**API Pays (Brésil / Équateur / Colombie)**
+```bash
+cd backend-pays
+npm install
+npm run dev
+# Configurer les variables d'environnement dans le .env du pays concerné
+# Brésil  → http://localhost:8001/docs
+# Équateur → http://localhost:8002/docs
+# Colombie → http://localhost:8003/docs
 ```
 
 | Service | URL |
@@ -30,16 +61,18 @@ make up
 ## Commandes utiles
 
 ```bash
-make up            # Démarrer tout (démo tout-en-un)
-make down          # Arrêter tout
-make logs          # Suivre les logs en temps réel
+docker compose up --build -d    # Démarrer tout
+docker compose down             # Arrêter tout
+docker compose logs -f          # Suivre les logs en temps réel
+docker compose down -v          # Supprimer les volumes (⚠ perte de données)
 
-make up-bresil     # Démarrer uniquement le stack Brésil
-make up-equateur   # Démarrer uniquement le stack Équateur
-make up-colombie   # Démarrer uniquement le stack Colombie
-make up-siege      # Démarrer uniquement le stack Siège
+# Stacks pays indépendants
+docker compose -p fk-bresil   -f pays/bresil/docker-compose.yml   up --build -d
+docker compose -p fk-equateur -f pays/equateur/docker-compose.yml up --build -d
+docker compose -p fk-colombie -f pays/colombie/docker-compose.yml up --build -d
 
-make clean         # Supprimer tous les volumes (⚠ perte de données)
+# Jenkins
+docker compose -f jenkins/docker-compose.yml up --build -d
 ```
 
 ---
@@ -48,36 +81,32 @@ make clean         # Supprimer tous les volumes (⚠ perte de données)
 
 ```
 .
-├── docker-compose.yml        # Compose tout-en-un (mode démo)
+├── docker-compose.yml        # Compose tout-en-un
+├── docker-compose.ci.yml     # Override CI (pas de ports host)
 ├── .env.example              # Variables racine à copier en .env
-├── Makefile                  # Commandes de lancement
 │
 ├── pays/
 │   ├── bresil/               # Stack local Brésil
-│   │   ├── docker-compose.yml    # DB + MQTT + API isolés
-│   │   ├── .env.example          # Variables (ports, SMTP, pays)
-│   │   ├── mosquitto/
-│   │   │   └── mosquitto.conf    # Config broker MQTT
-│   │   └── db/
-│   │       └── init.sql          # Schéma SQL + seed entrepôts BR01/BR02
-│   ├── equateur/             # Idem — ports 1884/8002 — seuils 31°C/60%
-│   └── colombie/             # Idem — ports 1885/8003 — seuils 26°C/80%
+│   │   ├── docker-compose.yml    # MQTT + API (SQLite partagée)
+│   │   └── mosquitto/
+│   │       └── mosquitto.conf    # Config broker MQTT
+│   ├── equateur/             # Idem — port MQTT 1884 — API 8002
+│   └── colombie/             # Idem — port MQTT 1885 — API 8003
 │
-├── api-pays/                 # Code API partagé entre les 3 pays
+├── backend-pays/             # Code API partagé entre les 3 pays (Node.js + Express)
 │   ├── Dockerfile
-│   ├── requirements.txt      # FastAPI, uvicorn, psycopg2, paho-mqtt
-│   └── main.py               # Placeholder Step 1 — à compléter Étape 2
+│   ├── package.json
+│   └── src/
 │
 └── siege/
     ├── docker-compose.yml    # Stack siège (API centrale + frontend)
     ├── .env.example          # URLs des APIs pays + ports
-    ├── api/
+    ├── api/                  # API d'agrégation (Node.js + Express)
     │   ├── Dockerfile
-    │   ├── requirements.txt  # FastAPI, httpx
-    │   └── main.py           # Agrégation async multi-pays, résilience timeout
-    └── frontend/
-        ├── Dockerfile        # nginx
-        └── index.html        # Placeholder Step 1 — à remplacer Étape 5 (React)
+    │   └── package.json      # Agrégation multi-pays, résilience timeout 3s
+    └── frontend/             # Interface React + Vite + Chart.js
+        ├── Dockerfile
+        └── package.json
 ```
 
 ---
