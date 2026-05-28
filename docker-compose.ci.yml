@@ -1,0 +1,10 @@
+# Override CI — supprime l'exposition des ports host
+# Les conteneurs se parlent via le reseau Docker interne
+# health-check.sh utilise docker compose exec, pas les ports host
+services:
+  siege-api:
+    ports: []
+  siege-frontend:
+    ports: []
+  mailhog:
+    ports: []
