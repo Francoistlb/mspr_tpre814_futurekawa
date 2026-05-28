@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = "futurekawa-ci-${env.BUILD_NUMBER}"
-        COMPOSE_ARGS         = "-f docker-compose.yml -f docker-compose.ci.yml --env-file .env.ci"
+        COMPOSE_ARGS         = "-f docker-compose.yml --env-file .env.ci"
         GITHUB_REPO          = "Francoistlb/mspr_tpre814_futurekawa"
     }
 
