@@ -1,0 +1,13 @@
+# Chargé automatiquement par Docker Compose en local
+# En CI, seul docker-compose.yml est utilisé (via -f explicite)
+services:
+  siege-api:
+    ports:
+      - "${SIEGE_API_PORT:-8000}:8000"
+  siege-frontend:
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+  mailhog:
+    ports:
+      - "1025:1025"
+      - "8025:8025"

@@ -46,6 +46,7 @@ entity "alertes" as A {
     --
       entrepot_id         : INTEGER      <<FK>>
       lot_id              : VARCHAR(50)  <<FK>>
+      mesure_id           : BIGINT       <<FK>>
     * type                : VARCHAR(20)
     * message             : TEXT
     * email_envoye        : BOOLEAN
@@ -57,6 +58,7 @@ E ||--o{ L : "contient\n(1 entrepot -> N lots)"
 E ||--o{ M : "enregistre\n(1 entrepot -> N mesures IoT)"
 E ||--o{ A : "declenche"
 L ||--o{ A : "concerne"
+M ||--o{ A : "provoque\n(mesure hors plage)"
 
 note bottom of L
   Tri par date_stockage ASC
