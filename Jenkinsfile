@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = "futurekawa-ci-${env.BUILD_NUMBER}"
-        COMPOSE_FILE         = "docker-compose.yml:docker-compose.ci.yml"
-        ENV_FILE             = ".env.ci"
+        COMPOSE_ARGS         = "-f docker-compose.yml -f docker-compose.ci.yml --env-file .env.ci"
         GITHUB_REPO          = "Francoistlb/mspr_tpre814_futurekawa"
     }
 
@@ -13,7 +12,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
-    // Polling toutes les 1 minutes — pas besoin de webhook ni de serveur public
     triggers {
         pollSCM('* * * * *')
     }
@@ -39,14 +37,14 @@ pipeline {
         stage('Build') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
-                sh 'docker compose --env-file ${ENV_FILE} build --no-cache'
+                sh 'docker compose ${COMPOSE_ARGS} build --no-cache'
             }
         }
 
         stage('Start') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
-                sh 'docker compose --env-file ${ENV_FILE} up -d'
+                sh 'docker compose ${COMPOSE_ARGS} up -d'
             }
         }
 
@@ -58,7 +56,7 @@ pipeline {
                         local svc=$1
                         echo "==> Attente du conteneur $svc..."
                         for i in $(seq 1 30); do
-                            if docker compose --env-file "$ENV_FILE" exec -T "$svc" true 2>/dev/null; then
+                            if docker compose ${COMPOSE_ARGS} exec -T "$svc" true 2>/dev/null; then
                                 echo "$svc : conteneur accessible"
                                 return 0
                             fi
@@ -79,7 +77,7 @@ pipeline {
         stage('Tests') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
-                sh 'ENV_FILE=${ENV_FILE} bash test-cicd/health-check.sh'
+                sh 'bash test-cicd/health-check.sh'
             }
         }
 
@@ -87,7 +85,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker compose --env-file ${ENV_FILE} down -v --remove-orphans || true'
+            sh 'docker compose ${COMPOSE_ARGS} down -v --remove-orphans || true'
         }
         success {
             withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
@@ -101,7 +99,7 @@ pipeline {
             }
         }
         failure {
-            sh 'docker compose --env-file ${ENV_FILE} logs --tail=50 || true'
+            sh 'docker compose ${COMPOSE_ARGS} logs --tail=50 || true'
             withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
                 sh """
                     curl -s -X POST \
