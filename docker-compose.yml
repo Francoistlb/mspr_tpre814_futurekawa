@@ -117,8 +117,6 @@ services:
       EQUATEUR_API_URL: http://equateur-api:3000
       COLOMBIE_API_URL: http://colombie-api:3000
       API_TIMEOUT_S: ${API_TIMEOUT_S}
-    ports:
-      - "${SIEGE_API_PORT:-8000}:8000"
     depends_on:
       - bresil-api
       - equateur-api
@@ -131,8 +129,6 @@ services:
     build:
       context: ./siege/frontend
       dockerfile: Dockerfile
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - siege-api
     networks:
