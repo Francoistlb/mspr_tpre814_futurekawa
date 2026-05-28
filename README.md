@@ -11,11 +11,11 @@ Solution applicative distribuée de suivi des stocks et des conditions de stocka
 ### Avec Docker (recommandé)
 
 ```bash
-# 1. Copier les fichiers d'environnement
-make setup
+# 1. Copier le fichier d'environnement
+cp .env.example .env
 
-# 2. Démarrer toute la solution (mode démo)
-make up
+# 2. Démarrer toute la solution
+docker compose up --build -d
 ```
 
 ### Développement local (sans Docker)
@@ -61,16 +61,18 @@ npm run dev
 ## Commandes utiles
 
 ```bash
-make up            # Démarrer tout (démo tout-en-un)
-make down          # Arrêter tout
-make logs          # Suivre les logs en temps réel
+docker compose up --build -d    # Démarrer tout
+docker compose down             # Arrêter tout
+docker compose logs -f          # Suivre les logs en temps réel
+docker compose down -v          # Supprimer les volumes (⚠ perte de données)
 
-make up-bresil     # Démarrer uniquement le stack Brésil
-make up-equateur   # Démarrer uniquement le stack Équateur
-make up-colombie   # Démarrer uniquement le stack Colombie
-make up-siege      # Démarrer uniquement le stack Siège
+# Stacks pays indépendants
+docker compose -p fk-bresil   -f pays/bresil/docker-compose.yml   up --build -d
+docker compose -p fk-equateur -f pays/equateur/docker-compose.yml up --build -d
+docker compose -p fk-colombie -f pays/colombie/docker-compose.yml up --build -d
 
-make clean         # Supprimer tous les volumes (⚠ perte de données)
+# Jenkins
+docker compose -f jenkins/docker-compose.yml up --build -d
 ```
 
 ---
@@ -79,20 +81,17 @@ make clean         # Supprimer tous les volumes (⚠ perte de données)
 
 ```
 .
-├── docker-compose.yml        # Compose tout-en-un (mode démo)
+├── docker-compose.yml        # Compose tout-en-un
+├── docker-compose.ci.yml     # Override CI (pas de ports host)
 ├── .env.example              # Variables racine à copier en .env
-├── Makefile                  # Commandes de lancement
 │
 ├── pays/
 │   ├── bresil/               # Stack local Brésil
-│   │   ├── docker-compose.yml    # DB + MQTT + API isolés
-│   │   ├── .env.example          # Variables (ports, SMTP, pays)
-│   │   ├── mosquitto/
-│   │   │   └── mosquitto.conf    # Config broker MQTT
-│   │   └── db/
-│   │       └── init.sql          # Schéma SQL + seed entrepôts BR01/BR02
-│   ├── equateur/             # Idem — ports 1884/8002 — seuils 31°C/60%
-│   └── colombie/             # Idem — ports 1885/8003 — seuils 26°C/80%
+│   │   ├── docker-compose.yml    # MQTT + API (SQLite partagée)
+│   │   └── mosquitto/
+│   │       └── mosquitto.conf    # Config broker MQTT
+│   ├── equateur/             # Idem — port MQTT 1884 — API 8002
+│   └── colombie/             # Idem — port MQTT 1885 — API 8003
 │
 ├── backend-pays/             # Code API partagé entre les 3 pays (Node.js + Express)
 │   ├── Dockerfile
