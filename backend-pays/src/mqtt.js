@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-
-dotenv.config();
 const mqtt = require('mqtt');
 const { pool } = require('./db');
 const { verifierSeuils } = require('./alertes');
@@ -19,7 +16,7 @@ const demarrerConsumer = () => {
       const pays = process.env.PAYS.toLowerCase();
 
       const e = await pool.query(
-        'SELECT * FROM entrepots WHERE code = $1 AND pays = $2',
+        'SELECT * FROM entrepots WHERE code = ? AND pays = ?',
         [data.entrepot, pays]
       );
       if (!e.rows.length) {
@@ -32,14 +29,14 @@ const demarrerConsumer = () => {
         Math.abs(data.temp - entrepot.temp_ideale) > entrepot.tolerance_temp ||
         Math.abs(data.hum - entrepot.hum_ideale) > entrepot.tolerance_hum;
 
-      const mesure = await pool.query(
+      const inserted = await pool.query(
         `INSERT INTO mesures (entrepot_id, temperature, humidite, hors_plage, timestamp)
-         VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-        [entrepot.id, data.temp, data.hum, hors_plage, data.ts || new Date()]
+         VALUES (?, ?, ?, ?, ?)`,
+        [entrepot.id, data.temp, data.hum, hors_plage ? 1 : 0, data.ts || new Date().toISOString()]
       );
 
       if (hors_plage) {
-        await verifierSeuils(entrepot, data.temp, data.hum, mesure.rows[0].id);
+        await verifierSeuils(entrepot, data.temp, data.hum, inserted.lastID);
       }
     } catch (err) {
       console.error('Erreur message MQTT:', err.message);

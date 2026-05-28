@@ -5,36 +5,6 @@
 
 services:
 
-  # ---- Base de donnees centralisee -------------------------
-  postgres-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - futurekawa_net
-
-  # ---- Adminer : interface de gestion BDD ------------------
-  adminer:
-    image: adminer:latest
-    ports:
-      - "${ADMINER_PORT:-8081}:8080"
-    depends_on:
-      postgres-db:
-        condition: service_healthy
-    networks:
-      - futurekawa_net
-    restart: unless-stopped
-
   # ---- Bresil : MQTT + API ---------------------------------
   bresil-mqtt:
     image: eclipse-mosquitto:2.0
@@ -51,11 +21,7 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DB_HOST: postgres-db
-      DB_PORT: "5432"
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PATH: /data/futurekawa.db
       MQTT_HOST: bresil-mqtt
       MQTT_PORT: "1883"
       MQTT_TOPIC: futurekawa/bresil/#
@@ -63,9 +29,9 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_BRESIL}
+    volumes:
+      - ./db:/data
     depends_on:
-      postgres-db:
-        condition: service_healthy
       bresil-mqtt:
         condition: service_started
     networks:
@@ -89,11 +55,7 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DB_HOST: postgres-db
-      DB_PORT: "5432"
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PATH: /data/futurekawa.db
       MQTT_HOST: equateur-mqtt
       MQTT_PORT: "1883"
       MQTT_TOPIC: futurekawa/equateur/#
@@ -101,9 +63,9 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_EQUATEUR}
+    volumes:
+      - ./db:/data
     depends_on:
-      postgres-db:
-        condition: service_healthy
       equateur-mqtt:
         condition: service_started
     networks:
@@ -127,11 +89,7 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DB_HOST: postgres-db
-      DB_PORT: "5432"
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PATH: /data/futurekawa.db
       MQTT_HOST: colombie-mqtt
       MQTT_PORT: "1883"
       MQTT_TOPIC: futurekawa/colombie/#
@@ -139,9 +97,9 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_COLOMBIE}
+    volumes:
+      - ./db:/data
     depends_on:
-      postgres-db:
-        condition: service_healthy
       colombie-mqtt:
         condition: service_started
     networks:
@@ -192,7 +150,6 @@ services:
 
 # ---- Volumes ---------------------------------------------
 volumes:
-  postgres_data:
   bresil_mqtt_data:
   bresil_mqtt_logs:
   equateur_mqtt_data:
