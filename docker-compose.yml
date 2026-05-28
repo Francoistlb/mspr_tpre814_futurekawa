@@ -1,34 +1,11 @@
 # ============================================================
-# FutureKawa — Compose DEMO (tout-en-un)
-# Demarre l'ensemble de la solution sur une seule machine
-# Usage : docker compose up --build
-#
-# Pas de ports exposes : les services communiquent via les
-# reseaux Docker internes. Pour acceder depuis le navigateur
-# en local, utiliser les stacks individuelles :
-#   make up-bresil / make up-siege / etc.
+# FutureKawa — Compose principal
+# Toutes les valeurs configurables sont dans .env
 # ============================================================
 
 services:
 
-  # ---- Bresil : DB + MQTT + API ----------------------------
-  bresil-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: futurekawa_bresil
-      POSTGRES_USER: futurekawa
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    volumes:
-      - bresil_db_data:/var/lib/postgresql/data
-      - ./pays/bresil/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U futurekawa"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - bresil_net
-
+  # ---- Bresil : MQTT + API ---------------------------------
   bresil-mqtt:
     image: eclipse-mosquitto:2.0
     volumes:
@@ -44,17 +21,17 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@bresil-db:5432/futurekawa_bresil
-      MQTT_BROKER_HOST: bresil-mqtt
-      MQTT_BROKER_PORT: "1883"
+      DB_PATH: /data/futurekawa.db
+      MQTT_HOST: bresil-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/bresil/#
       PAYS: bresil
-      PAYS_CODE: BR
-      SMTP_HOST: mailhog
-      SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.bresil@futurekawa.com
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_BRESIL}
+    volumes:
+      - ./db:/data
     depends_on:
-      bresil-db:
-        condition: service_healthy
       bresil-mqtt:
         condition: service_started
     networks:
@@ -62,24 +39,7 @@ services:
       - futurekawa_net
     restart: unless-stopped
 
-  # ---- Equateur : DB + MQTT + API --------------------------
-  equateur-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: futurekawa_equateur
-      POSTGRES_USER: futurekawa
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    volumes:
-      - equateur_db_data:/var/lib/postgresql/data
-      - ./pays/equateur/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U futurekawa"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - equateur_net
-
+  # ---- Equateur : MQTT + API -------------------------------
   equateur-mqtt:
     image: eclipse-mosquitto:2.0
     volumes:
@@ -95,17 +55,17 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@equateur-db:5432/futurekawa_equateur
-      MQTT_BROKER_HOST: equateur-mqtt
-      MQTT_BROKER_PORT: "1883"
+      DB_PATH: /data/futurekawa.db
+      MQTT_HOST: equateur-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/equateur/#
       PAYS: equateur
-      PAYS_CODE: EQ
-      SMTP_HOST: mailhog
-      SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.equateur@futurekawa.com
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_EQUATEUR}
+    volumes:
+      - ./db:/data
     depends_on:
-      equateur-db:
-        condition: service_healthy
       equateur-mqtt:
         condition: service_started
     networks:
@@ -113,24 +73,7 @@ services:
       - futurekawa_net
     restart: unless-stopped
 
-  # ---- Colombie : DB + MQTT + API --------------------------
-  colombie-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: futurekawa_colombie
-      POSTGRES_USER: futurekawa
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    volumes:
-      - colombie_db_data:/var/lib/postgresql/data
-      - ./pays/colombie/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U futurekawa"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - colombie_net
-
+  # ---- Colombie : MQTT + API -------------------------------
   colombie-mqtt:
     image: eclipse-mosquitto:2.0
     volumes:
@@ -146,17 +89,17 @@ services:
       context: ./backend-pays
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://futurekawa:${DB_PASSWORD:-changeme}@colombie-db:5432/futurekawa_colombie
-      MQTT_BROKER_HOST: colombie-mqtt
-      MQTT_BROKER_PORT: "1883"
+      DB_PATH: /data/futurekawa.db
+      MQTT_HOST: colombie-mqtt
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: futurekawa/colombie/#
       PAYS: colombie
-      PAYS_CODE: CO
-      SMTP_HOST: mailhog
-      SMTP_PORT: "1025"
-      ALERT_EMAIL_RESPONSABLE: responsable.colombie@futurekawa.com
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      RESPONSABLE_EMAIL: ${RESPONSABLE_EMAIL_COLOMBIE}
+    volumes:
+      - ./db:/data
     depends_on:
-      colombie-db:
-        condition: service_healthy
       colombie-mqtt:
         condition: service_started
     networks:
@@ -170,10 +113,10 @@ services:
       context: ./siege/api
       dockerfile: Dockerfile
     environment:
-      BRESIL_API_URL: http://bresil-api:8000
-      EQUATEUR_API_URL: http://equateur-api:8000
-      COLOMBIE_API_URL: http://colombie-api:8000
-      API_TIMEOUT_S: "3"
+      BRESIL_API_URL: http://bresil-api:3000
+      EQUATEUR_API_URL: http://equateur-api:3000
+      COLOMBIE_API_URL: http://colombie-api:3000
+      API_TIMEOUT_S: ${API_TIMEOUT_S}
     depends_on:
       - bresil-api
       - equateur-api
@@ -203,19 +146,14 @@ services:
 
 # ---- Volumes ---------------------------------------------
 volumes:
-  bresil_db_data:
   bresil_mqtt_data:
   bresil_mqtt_logs:
-  equateur_db_data:
   equateur_mqtt_data:
   equateur_mqtt_logs:
-  colombie_db_data:
   colombie_mqtt_data:
   colombie_mqtt_logs:
 
 # ---- Reseaux ---------------------------------------------
-# Chaque pays a son reseau isole (simule l'isolation geographique)
-# futurekawa_net : reseau partage siege <-> APIs pays
 networks:
   bresil_net:
   equateur_net:
