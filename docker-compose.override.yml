@@ -11,3 +11,12 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+  bresil-mqtt:
+    ports:
+      - "1883:1883"
+  equateur-mqtt:
+    ports:
+      - "1884:1883"
+  colombie-mqtt:
+    ports:
+      - "1885:1883"
