@@ -8,12 +8,43 @@ Solution applicative distribuée de suivi des stocks et des conditions de stocka
 
 ## Démarrage rapide
 
+### Avec Docker (recommandé)
+
 ```bash
 # 1. Copier les fichiers d'environnement
 make setup
 
 # 2. Démarrer toute la solution (mode démo)
 make up
+```
+
+### Développement local (sans Docker)
+
+**Frontend (React + Vite)**
+```bash
+cd siege/frontend
+npm install
+npm run dev
+# Accessible sur http://localhost:5173
+```
+
+**API Siège (Node.js + Express)**
+```bash
+cd siege/api
+npm install
+npm run dev
+# Accessible sur http://localhost:8000/docs
+```
+
+**API Pays (Brésil / Équateur / Colombie)**
+```bash
+cd backend-pays
+npm install
+npm run dev
+# Configurer les variables d'environnement dans le .env du pays concerné
+# Brésil  → http://localhost:8001/docs
+# Équateur → http://localhost:8002/docs
+# Colombie → http://localhost:8003/docs
 ```
 
 | Service | URL |
@@ -63,21 +94,20 @@ make clean         # Supprimer tous les volumes (⚠ perte de données)
 │   ├── equateur/             # Idem — ports 1884/8002 — seuils 31°C/60%
 │   └── colombie/             # Idem — ports 1885/8003 — seuils 26°C/80%
 │
-├── api-pays/                 # Code API partagé entre les 3 pays
+├── backend-pays/             # Code API partagé entre les 3 pays (Node.js + Express)
 │   ├── Dockerfile
-│   ├── requirements.txt      # FastAPI, uvicorn, psycopg2, paho-mqtt
-│   └── main.py               # Placeholder Step 1 — à compléter Étape 2
+│   ├── package.json
+│   └── src/
 │
 └── siege/
     ├── docker-compose.yml    # Stack siège (API centrale + frontend)
     ├── .env.example          # URLs des APIs pays + ports
-    ├── api/
+    ├── api/                  # API d'agrégation (Node.js + Express)
     │   ├── Dockerfile
-    │   ├── requirements.txt  # FastAPI, httpx
-    │   └── main.py           # Agrégation async multi-pays, résilience timeout
-    └── frontend/
-        ├── Dockerfile        # nginx
-        └── index.html        # Placeholder Step 1 — à remplacer Étape 5 (React)
+    │   └── package.json      # Agrégation multi-pays, résilience timeout 3s
+    └── frontend/             # Interface React + Vite + Chart.js
+        ├── Dockerfile
+        └── package.json
 ```
 
 ---
