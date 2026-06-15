@@ -6,6 +6,45 @@ const router = Router();
 
 /**
  * @openapi
+ * /siege/mesures/{pays}:
+ *   get:
+ *     tags: [mesures]
+ *     summary: Dernières mesures IoT d'un pays (tous entrepôts)
+ *     parameters:
+ *       - in: path
+ *         name: pays
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [bresil, equateur, colombie]
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 200
+ *     responses:
+ *       200:
+ *         description: Mesures du pays
+ */
+router.get("/mesures/:pays", async (req, res) => {
+  const { pays } = req.params;
+  const { limit } = req.query;
+
+  if (!config.pays[pays]) {
+    return res.status(404).json({ error: `Pays inconnu : "${pays}"` });
+  }
+
+  const path = limit ? `/mesures?limit=${limit}` : '/mesures';
+  const resultat = await fetchPays(pays, path);
+
+  if (resultat.status === "error") {
+    return res.status(503).json(resultat);
+  }
+  res.json(resultat);
+});
+
+/**
+ * @openapi
  * /siege/mesures/{pays}/{lot_id}:
  *   get:
  *     tags: [mesures]
