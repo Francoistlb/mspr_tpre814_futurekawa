@@ -8,8 +8,11 @@ services:
   # ---- Bresil : MQTT + API ---------------------------------
   bresil-mqtt:
     image: eclipse-mosquitto:2.0
+    entrypoint: >
+      sh -c "printf 'listener 1883\nallow_anonymous true\npersistence true\npersistence_location /mosquitto/data/\nautosave_interval 60\nlog_dest stdout\nlog_dest file /mosquitto/log/mosquitto.log\nlog_type information\n'
+      > /mosquitto/config/mosquitto.conf
+      && mosquitto -c /mosquitto/config/mosquitto.conf"
     volumes:
-      - ./pays/bresil/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - bresil_mqtt_data:/mosquitto/data
       - bresil_mqtt_logs:/mosquitto/log
     networks:
@@ -42,8 +45,11 @@ services:
   # ---- Equateur : MQTT + API -------------------------------
   equateur-mqtt:
     image: eclipse-mosquitto:2.0
+    entrypoint: >
+      sh -c "printf 'listener 1883\nallow_anonymous true\npersistence true\npersistence_location /mosquitto/data/\nautosave_interval 60\nlog_dest stdout\nlog_dest file /mosquitto/log/mosquitto.log\nlog_type information\n'
+      > /mosquitto/config/mosquitto.conf
+      && mosquitto -c /mosquitto/config/mosquitto.conf"
     volumes:
-      - ./pays/equateur/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - equateur_mqtt_data:/mosquitto/data
       - equateur_mqtt_logs:/mosquitto/log
     networks:
@@ -76,8 +82,11 @@ services:
   # ---- Colombie : MQTT + API -------------------------------
   colombie-mqtt:
     image: eclipse-mosquitto:2.0
+    entrypoint: >
+      sh -c "printf 'listener 1883\nallow_anonymous true\npersistence true\npersistence_location /mosquitto/data/\nautosave_interval 60\nlog_dest stdout\nlog_dest file /mosquitto/log/mosquitto.log\nlog_type information\n'
+      > /mosquitto/config/mosquitto.conf
+      && mosquitto -c /mosquitto/config/mosquitto.conf"
     volumes:
-      - ./pays/colombie/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - colombie_mqtt_data:/mosquitto/data
       - colombie_mqtt_logs:/mosquitto/log
     networks:
