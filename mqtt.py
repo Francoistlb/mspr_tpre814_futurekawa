@@ -9,10 +9,10 @@ SERIAL_PORT = "/dev/cu.usbmodem11201"  # Mac — Windows : "COM3"
 BAUD_RATE = 9600
 
 MQTT_HOST = "127.0.0.1"
-MQTT_PORT = 1883  # Brésil:1883 | Équateur:1884 | Colombie:1885
+MQTT_PORT = 1884  # Brésil:1883 | Équateur:1884 | Colombie:1885
 
-PAYS = "bresil"  # bresil | equateur | colombie
-ENTREPOT = "BR01"  # BR01 BR02 | EQ01 EQ02 | CO01 CO02
+PAYS = "equateur"  # bresil | equateur | colombie
+ENTREPOT = "EQ01"  # BR01 BR02 | EQ01 EQ02 | CO01 CO02
 # ------------------------------------------------------------
 
 TOPIC = f"futurekawa/{PAYS}/{ENTREPOT}/mesures"
