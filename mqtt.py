@@ -1,17 +1,18 @@
 import json
-import paho.mqtt.client as mqtt
-import serial
 from datetime import datetime, timezone
 
+import paho.mqtt.client as mqtt
+import serial
+
 # ---- Config ------------------------------------------------
-SERIAL_PORT  = "/dev/cu.usbmodem11201"  # Mac — Windows : "COM3"
-BAUD_RATE    = 9600
+SERIAL_PORT = "/dev/cu.usbmodem11201"  # Mac — Windows : "COM3"
+BAUD_RATE = 9600
 
-MQTT_HOST    = "127.0.0.1"
-MQTT_PORT    = 1883          # Brésil:1883 | Équateur:1884 | Colombie:1885
+MQTT_HOST = "127.0.0.1"
+MQTT_PORT = 1883  # Brésil:1883 | Équateur:1884 | Colombie:1885
 
-PAYS         = "bresil"      # bresil | equateur | colombie
-ENTREPOT     = "BR01"        # BR01 BR02 | EQ01 EQ02 | CO01 CO02
+PAYS = "bresil"  # bresil | equateur | colombie
+ENTREPOT = "BR01"  # BR01 BR02 | EQ01 EQ02 | CO01 CO02
 # ------------------------------------------------------------
 
 TOPIC = f"futurekawa/{PAYS}/{ENTREPOT}/mesures"
@@ -37,18 +38,20 @@ with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
             continue
 
         try:
-            hum  = float(parts[0])
+            hum = float(parts[0])
             temp = float(parts[1])
         except ValueError:
             print(f"Ligne ignorée (format inattendu) : {line}")
             continue
 
-        payload = json.dumps({
-            "entrepot": ENTREPOT,
-            "temp":     temp,
-            "hum":      hum,
-            "ts":       datetime.now(timezone.utc).isoformat()
-        })
+        payload = json.dumps(
+            {
+                "entrepot": ENTREPOT,
+                "temp": temp,
+                "hum": hum,
+                "ts": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         mqttc.publish(TOPIC, payload)
         print(f"Publié → {TOPIC} : {payload}")

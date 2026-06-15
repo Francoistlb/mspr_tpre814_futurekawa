@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PaysSelector from '../components/PaysSelector';
 import StatusBadge from '../components/StatusBadge';
-import { getLots } from '../data/mockData';
+import { fetchStocks } from '../api';
 import { formatDate } from '../utils/format';
 
 export default function Stocks() {
-  const [pays, setPays] = useState(null);
-  const lots = getLots({ pays });
+  const [pays,    setPays]    = useState(null);
+  const [tous,    setTous]    = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(null);
+
+  useEffect(() => {
+    fetchStocks()
+      .then(setTous)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const lots = pays ? tous.filter((l) => l.pays === pays) : tous;
 
   return (
     <>
@@ -20,7 +31,11 @@ export default function Stocks() {
       </div>
 
       <div className="table-wrap">
-        {lots.length === 0 ? (
+        {loading ? (
+          <div className="empty">Chargement...</div>
+        ) : error ? (
+          <div className="empty" style={{ color: 'var(--err)' }}>Erreur : {error}</div>
+        ) : lots.length === 0 ? (
           <div className="empty">Aucun lot pour ce pays.</div>
         ) : (
           <table className="data">
@@ -52,7 +67,7 @@ export default function Stocks() {
                     <td className="cell-num">{l.age_jours} j</td>
                     <td><StatusBadge statut={l.statut} /></td>
                     <td>
-                      <Link to={`/lots/${l.id}`} className="btn btn-sm">
+                      <Link to={`/lots/${encodeURIComponent(l.id)}`} className="btn btn-sm">
                         Détail →
                       </Link>
                     </td>
