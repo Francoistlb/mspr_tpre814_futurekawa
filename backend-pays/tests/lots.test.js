@@ -60,6 +60,15 @@ describe('POST /lots', () => {
   });
 });
 
+describe('GET /lots — format réponse', () => {
+  test('✅ Retourne toujours un tableau (même vide)', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).get('/lots');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+});
+
 describe('GET /lots/:id', () => {
   test('✅ Retourne un lot existant', async () => {
     pool.query.mockResolvedValueOnce({ rows: [LOT_MOCK] });
