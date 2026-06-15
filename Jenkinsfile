@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = "futurekawa-ci-${env.BUILD_NUMBER}"
-        COMPOSE_ARGS         = "-f docker-compose.yml --env-file .env.ci"
+        COMPOSE_ARGS         = "-f docker-compose.yml -f docker-compose.ci.yml --env-file .env.ci"
         GITHUB_REPO          = "Francoistlb/mspr_tpre814_futurekawa"
     }
 
@@ -74,7 +74,36 @@ pipeline {
             }
         }
 
-        stage('Tests') {
+        stage('Tests unitaires') {
+            when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
+            steps {
+                // Tests backend pays (26 tests — seuils, FIFO, alertes, mesures)
+                sh '''
+                    docker run --rm \
+                        -e PAYS=bresil \
+                        -e DB_PATH=/tmp/test.db \
+                        -e MQTT_HOST=localhost \
+                        -e MQTT_PORT=1883 \
+                        -e MQTT_TOPIC=test \
+                        -e SMTP_HOST=localhost \
+                        -e SMTP_PORT=1025 \
+                        -e RESPONSABLE_EMAIL=test@futurekawa.com \
+                        $(docker compose ${COMPOSE_ARGS} images -q bresil-api) \
+                        npm test -- --ci --forceExit
+                '''
+                // Tests backend siege (12 tests — agregation, resilience, routes)
+                sh '''
+                    docker run --rm \
+                        -e BRESIL_API_URL=http://localhost:8001 \
+                        -e EQUATEUR_API_URL=http://localhost:8002 \
+                        -e COLOMBIE_API_URL=http://localhost:8003 \
+                        $(docker compose ${COMPOSE_ARGS} images -q siege-api) \
+                        npm test -- --ci --forceExit
+                '''
+            }
+        }
+
+        stage('Tests integration') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
                 sh 'bash test-cicd/health-check.sh'

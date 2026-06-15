@@ -17,3 +17,5 @@ services:
 
 volumes:
   jenkins_home:
+    external: true
+    name: msprtpre814_jenkins_home

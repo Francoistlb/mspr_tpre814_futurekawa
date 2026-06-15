@@ -367,6 +367,8 @@ table.data tr.row-err  td { background: rgba(239, 68, 68, 0.05); }
 .btn-sm { padding: 0.25rem 0.55rem; font-size: 0.78rem; }
 .btn-ghost { border-color: transparent; background: transparent; color: var(--text-muted); }
 .btn-ghost:hover { background: var(--surface-alt); color: var(--text); }
+.btn-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-active:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
 
 /* ---- Pays selector ---- */
 .pays-selector {
