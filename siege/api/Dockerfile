@@ -4,9 +4,10 @@ WORKDIR /app
 
 # Installer les dépendances en premier (cache Docker layer)
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install
 
 COPY src/ ./src/
+COPY tests/ ./tests/
 
 EXPOSE 8000
 
