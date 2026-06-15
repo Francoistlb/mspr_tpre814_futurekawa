@@ -12,6 +12,34 @@ const resolveEntrepot = async (code) => {
   return r.rows[0] || null;
 };
 
+/**
+ * @openapi
+ * /lots:
+ *   post:
+ *     tags: [lots]
+ *     summary: Créer un nouveau lot
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id, entrepot]
+ *             properties:
+ *               id:            { type: string, example: "LOT-BR-2025-007" }
+ *               entrepot:      { type: string, example: "BR01" }
+ *               date_stockage: { type: string, format: date-time }
+ *               notes:         { type: string }
+ *     responses:
+ *       201:
+ *         description: Lot créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lot'
+ *       404:
+ *         description: Entrepôt introuvable
+ */
 router.post('/', async (req, res) => {
   const { id, entrepot, date_stockage, notes } = req.body;
   try {
@@ -29,6 +57,22 @@ router.post('/', async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /lots:
+ *   get:
+ *     tags: [lots]
+ *     summary: Liste des lots triée FIFO (plus ancien en premier)
+ *     responses:
+ *       200:
+ *         description: Liste des lots
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lot'
+ */
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
@@ -45,6 +89,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /lots/{id}:
+ *   get:
+ *     tags: [lots]
+ *     summary: Détail d'un lot
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: LOT-BR-2025-007
+ *     responses:
+ *       200:
+ *         description: Lot trouvé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lot'
+ *       404:
+ *         description: Lot non trouvé
+ */
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
@@ -61,6 +128,39 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /lots/{id}/statut:
+ *   put:
+ *     tags: [lots]
+ *     summary: Mettre à jour le statut d'un lot
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [statut]
+ *             properties:
+ *               statut:
+ *                 type: string
+ *                 enum: [conforme, en_alerte, perime]
+ *     responses:
+ *       200:
+ *         description: Statut mis à jour
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lot'
+ *       404:
+ *         description: Lot non trouvé
+ */
 router.put('/:id/statut', async (req, res) => {
   const { statut } = req.body;
   try {
