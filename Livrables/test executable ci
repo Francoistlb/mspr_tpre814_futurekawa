@@ -1,0 +1,2 @@
+cd backend-pays/ npm test
+cd siege/api/ npm test

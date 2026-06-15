@@ -29,4 +29,16 @@ app.use('/lots',    require('./routes/lots'));
 app.use('/mesures', require('./routes/mesures'));
 app.use('/alertes', require('./routes/alertes'));
 
+if (process.env.NODE_ENV !== 'production') {
+  const { verifierPeremption } = require('./alertes');
+  app.post('/dev/trigger-peremption', async (req, res) => {
+    try {
+      await verifierPeremption();
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+}
+
 module.exports = app;
