@@ -106,7 +106,7 @@ pipeline {
         stage('Tests integration') {
             when { anyOf { branch 'develop'; branch 'main'; changeRequest() } }
             steps {
-                sh 'bash test-cicd/health-check.sh'
+                sh 'bash jenkins/health-check.sh'
             }
         }
 
