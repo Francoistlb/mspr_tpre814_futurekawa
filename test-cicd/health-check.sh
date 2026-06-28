@@ -1,11 +1,14 @@
 #!/bin/bash
 # FutureKawa — Health check des APIs (premier test CI)
-# Usage : ENV_FILE=.env.ci bash test-cicd/health-check.sh
+# Usage (depuis la racine du projet) : bash test-cicd/health-check.sh
 #
 # Verifie que chaque API repond { status: "ok" } sur /health.
 # Necessite que les conteneurs soient deja demarres (docker compose up -d).
 
-ENV_FILE="${ENV_FILE:-.env.ci}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+
+ENV_FILE="${ENV_FILE:-$ROOT_DIR/.env.ci}"
 
 PASS=0
 FAIL=0
@@ -21,7 +24,7 @@ check_api() {
   printf "  %-24s" "$service (/health:$port)"
 
   for i in $(seq 1 $max); do
-    if output=$(docker compose --env-file "$ENV_FILE" exec -T "$service" \
+    if output=$(docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/docker-compose.yml" exec -T "$service" \
       node -e "
 const http = require('http');
 http.get('http://localhost:${port}/health', r => {

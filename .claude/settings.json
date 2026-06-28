@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\franc\\\\EPSI\\\\M1 - Certif\\\\MSPR TPRE814\" -Recurse -Directory | Select-Object -First 30 | ForEach-Object { $_.FullName })",
+      "Bash(sed -i 's/\\\\r//' \"c:/Users/franc/EPSI/M1 - Certif/MSPR TPRE814/test-cicd/seed-alertes.sh\")",
+      "Bash(bash \"c:/Users/franc/EPSI/M1 - Certif/MSPR TPRE814/test-cicd/seed-alertes.sh\")",
+      "Bash(bash \"c:/Users/franc/EPSI/M1 - Certif/MSPR TPRE814/test-cicd/seed-lots.sh\")",
+      "Bash(bash \"c:/Users/franc/EPSI/M1 - Certif/MSPR TPRE814/test-cicd/sim-arduino.sh\")",
+      "Bash(docker compose *)",
+      "Bash(curl -s -X POST http://localhost:8001/dev/trigger-peremption)",
+      "Bash(curl -s -X POST http://localhost:8002/dev/trigger-peremption)",
+      "Bash(curl -s -X POST http://localhost:8003/dev/trigger-peremption)",
+      "Bash(bash \"c:/Users/franc/EPSI/M1 - Certif/MSPR TPRE814/test-cicd/demo.sh\" --interval 5)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\franc\\EPSI\\M1 - Certif\\MSPR TPRE814\\test-cicd"
+    ]
+  }
+}
